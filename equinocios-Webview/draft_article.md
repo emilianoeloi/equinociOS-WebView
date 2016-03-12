@@ -3,13 +3,20 @@ A Porta de entrada pra o desenvolvedor web
 
 - Introdução
 
-Aqui eu coloco a visão de um profissional de aplicativos, que também já programou para web, mas em um tempo que a a Stack não estava tão profissionalizada, o termo webmaster era usado no lugar de front-end engineer + backend-engeneer. Trabalho com desenvolvimento iOS a 2 anos e nesse período participei de dois projetos que foi necessário criar uma App que seria uma "casca" para um site. E o interessante e que nos dois casos os requisitos não ficaram apenas no abertura do site simplesmente, o site deveria interagir a parte nativa do aplicativo, ou seja, o código do site e do app deveria conversar.
+Os aplicativos chegaram pra valer nas empresas, só que elas estão acabando de se tornar fluentes em mobile web. É natural ver o caminho de colocar o site mobile dentro de uma app, - Já tenho um site que parece um App! Porque não usar o mesmo? Eu acredito que em boa parte dos casos isso pode ser feito, mas é preciso ficar de olhos nos detalhes de implementação e principalmente a expectativa do usuário, afinal de contas é uma App e uma App de ver voar, no mínimo. 
+
+Participei de dois projetos em que o problema era criar uma "casca" para um site, e o interessante e que nos dois casos os requisitos não ficaram apenas no abertura do site simplesmente, o site deveria interagir a parte nativa do aplicativo, e aí que o desafio aumenta. Segue pontos que considero importante pra a implementação da webView
+
+ - Ponte JS/Objc
+ - Cookies
+ - Cache
+ - Performance
 
 - Ponte de comunicação Javascript/Objective-C
 
 O premeiro desafio é fazer essa conversa acontecer, a velha UIWebView não apresenta uma forma objetiva de executar javascript, e dessa forma nada de conversa fácil ente código nativo e Javascript. 
  - ObjC to JS
-Para enviar um javascript para a página abertar será necessário incluir o código no método 'webView: shouldStartLoadWithRequest: navigationType:' assim antes do carregamento da página é possível incluir no seu contexto qualquer código JS.
+Para enviar um javascript para a página, será necessário incluir o código no método 'webView: shouldStartLoadWithRequest: navigationType:', assim antes do carregamento da página é possível incluir no seu contexto qualquer código JS.
 
 ```objc
 - (void)injectJavascript:(NSString *)resource {
@@ -62,7 +69,7 @@ Esse padrão deverá ser identificado no mesmo método 'webView: shouldStartLoad
 
 O Projeto 'WebViewJavascriptBridge' de 'Marcus Westin' faz o trabalho descrito acima de uma maneira genérica permitindo a execução dos scripts a qualquer momento.
 
-O formato acima só seria mandatório para atender a ~6% de base de dispositivos que ainda rodam o iOS7, entretanto para os dispositivos com as versões do iOS 8+ está disponível a WebKit WebView, que é inclusivel uma recomendação de uso da Apple para essas versões de iOS. A comunicação Javascript/Código Nativo já está em um nível bem superior.
+O formato acima só seria mandatório para atender a ~6% de base de dispositivos que ainda rodam o iOS7, entretanto para os dispositivos com as versões do iOS 8+ está disponível a WebKit WebView, que é inclusive uma recomendação de uso da Apple para essas versões de iOS. A comunicação Javascript/Código Nativo já está em um nível bem superior.
 
 -JStoObjC
 [código]
@@ -124,8 +131,8 @@ Já para Manipular o cookie na WK precisaremos trabalhar com uma implementação
 
 - Cache e Performance
 
-Nesse ponto que as coisas começam a complicar, o que se espera de um aplicativo é que seja performático e uma webview nem sempre entrega isso de forma aceitável, caso seu conteúdo seja complexo, com muitas imagens, fontes customizadas, chamadas ajax etc isso tende a degradar o carregamento das páginas e não haverá cache que ajudará um segundo carregamento, já que além da obtenção dos dados o que torna uma página web rápida é também como ela foi construída. 
-A política de cache padrão de um request é a 'NSURLRequestUseProtocolCachePolicy' a imagem a baixo (obtida da própria referência da apple) descreve seu comportamente. Existem algumas outras políticas de para os diversos casos: Cache parcial sem cache etc.
+Nesse ponto que as coisas começam a complicar, o que se espera de um aplicativo é que seja performático e uma Webview nem sempre entrega isso de forma aceitável, caso seu conteúdo seja complexo, com muitas imagens, fontes customizadas, chamadas ajax etc isso tende a degradar o carregamento das páginas e não haverá cache que ajudará um segundo carregamento, já que além da obtenção dos dados o que torna uma página web rápida é também como ela foi construída. 
+A política de cache padrão de um request é a 'NSURLRequestUseProtocolCachePolicy' a imagem a baixo (obtida da própria referência da apple) descreve seu comportamento. Existem algumas outras políticas de para os diversos casos: Cache parcial sem cache etc.
 
  - Request com política de Cache
  ```objc
@@ -161,7 +168,7 @@ E mesmo que a escolha seja a de colocar o html embarcado ele ainda terá o passo
 ```
 
 - Performance do HTML
-Preocupar-se com a performance do código web para uma webview é ainda mais relevante além de ela ser uma versão piorada do navegador, estarmos em um dispositívo que precisa otimizar o consumo de bateria em alguns momentos. Então burbinar seu código vai ajudar substancialmente a sua webview rodar suave. A idéia que o código seja escrito de maneira minimizar reflows e repaints e obviamente scripts que bloqueiem a interação do usuário.
+Preocupar-se com a performance do código web para uma webview é ainda mais relevante além de ela ser uma versão piorada do navegador, estarmos em um dispositivo que precisa otimizar o consumo de bateria em alguns momentos. Então turbinar seu código vai ajudar substancialmente a sua webview rodar suave. A idéia que o código seja escrito de maneira minimizar reflows e repaints e obviamente scripts que bloqueiem a interação do usuário.
 
 https://www.youtube.com/watch?v=ZTnIxIA5KGw
 
@@ -178,7 +185,7 @@ E para um desenvolvedor web treinada nada é mais fundamental do que o inspect d
 [Imagens]
 
 - Browser inApp.
-E para os aplicativos que querem manter seu usuário ainda no contexto do seu aplicativo já que está disponível para iOS9+ o Safari View Controler. A SafariView controler apresenta a experiência consistente com o próprio safari levando o autopreenchimento de formulários cookies, ou seja se o usuário logou no safari e estará logado na safari view controller.
+E para os aplicativos que querem manter seu usuário ainda no contexto do seu aplicativo já que está disponível para iOS9+ o Safari View Controller. A SafariViewController apresenta a experiência consistente com o próprio safari levando o auto-preenchimento de formulários cookies, ou seja se o usuário logou no safari e estará logado na safari view controller.
 
 ```objc
 -(BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType{
@@ -205,11 +212,12 @@ E para os aplicativos que querem manter seu usuário ainda no contexto do seu ap
 
 - Conclusão
 
-Entenda que se utilizar conteúdo web ou mesmo um site dentro de um aplicativo você deve esperar um comportamento de browser e não de aplicativo. A Webview é como um motor de uma equipe menor da formula 1, o Safari sempre terá o motor do ano, e difícilmente a performance da webview superará o browser. Tomados esse cuidados um aplicativo feito na webe pade apresentar experiência fantástica para o usário e ajudar um time que seja focado em web a prepara um aplicativo sem maiores problemas.
+Existem ótimas experiências na web, muitas delas superam muitos apps por aí, mas é muito interessante entender até onde soluções web podem chegar e principalmente até onde uma webview pode solucionar o problema proposto. Podem existir casos em que a solução pode parecer um aplicativo a ponto de um usuário treinado não conseguir identificar. Mas em outros caos, nos quais o conteúdo é complexo demais pra funcionar com fluidez é bem mais interessante já deixar para o usuário que se trata de um acesso a web e isso já calibrará a expectativa do usuário com a app.
+E claro, desenvolvedor web, tire um tempinho para aprender as plataformas nativas, dê uma chance e você pode se surpreender e entender que construir um aplicativo pode ser bem interessante também. E obviamente recomendo fortemente essa série de artigos do equinociOS.
 
-- Agrdecimentos
+- Agradecimentos
 
-Agradeço Sohorio pela inciativa do projeto do EquinociOS e a todos os membros da comunidade do cocoaheads que prontamente absorveu a sugestão e em poucos dias já estavam com tudo preparado para o mês de março e seus 20 artigos planejados mais extras. Pra mim é um previlégio.
+Agradeço Solli pela inciativa do projeto que celebra o Equinócio e a todos os membros da comunidade do cocoaheads que prontamente absorveu a sugestão e em poucos dias já deixaram tudo preparado para um mês de artigos. Pra mim é um previlégio.
 
 - Referências
 AppStore - https://developer.apple.com/support/app-store/
@@ -221,8 +229,8 @@ Using JavaScript with WKWebView in iOS 8 -http://www.joshuakehn.com/2014/10/29/u
 A faster, more stable Chrome on iOS - http://blog.chromium.org/2016/01/a-faster-more-stable-chrome-on-ios.html
 Use WKWebView on iOS 9+ - https://bugs.chromium.org/p/chromium/issues/detail?id=423444
 
-Esse é mais um assunto que diz respeito a todas as plataformas, duas dessas eu tenho um contato maior, que são Android e obviamente o iOS. Quando se pensa em desenvolver com uma estrutura unificada nada mais natural para um time que pensar em continuar fazendo isso pra web. E isso é perfeitamente possível. Continuar no app uma experiência que é bem sucedida da web.
-
-Para um desenvolvedor web, uma app é um site são a mesma coisa em questão de performance, ou seja, um usuário leito não saberia identificar o que é o que, e de certa forma um leigo não seria capaz de apontar um ou outro. Mas não se trata disso, se trata do cenário, se tivermos falando de um conteúdo complexo, um aplicativo tem um trabalho de renderizar na tela a uma taxa de 60 frames por sengundo o que foi desenhado pelo desevolvedor, em uma webview as coisas são diferentes, o processo de renderização de um html baseado em sua forlha de estilos em castaca torna a renderização web, mesmo que bem otimizada um passo atrás do nativo, por que ele tem um processo de reflow e repaint, ou seja, quando se decidi fazer uma app com webview você está lutando contra a expectativa do usuário, e contra a tecnologia. O usuário sempre espera uma performance melhor de uma App, quando ele está no navegador ele já entendo que ele chamará uma página e ela vai ficar ali alguns segundos se ajeitando da ali e de lá.
-
-A UIWebview está presente desde d versão 2 da SDK,
+-- 
+Emiliano Eloi
+tim: (BH) 9451-0018
+fb : http://fb.com/emilianoeloi
+twt: @emilianoeloi

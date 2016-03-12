@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+static NSString *ABSOLUTE_URL=@"http://equinocios.com";
 
 @interface ViewController () <WKNavigationDelegate, WKUIDelegate, UIWebViewDelegate, WKScriptMessageHandler>
 
@@ -63,7 +64,7 @@
 }
 -(BOOL)isInnerURL:(NSString *)url{
     NSLog(@"\n\n --> %@ \n\n", url);
-    return [url rangeOfString:@"http://equinocios.com"].location != NSNotFound;
+    return [url rangeOfString:ABSOLUTE_URL].location != NSNotFound;
 }
 -(NSString *) titleWithUrl:(NSString *)url{
     NSString *title;
@@ -95,7 +96,7 @@
 -(void)loadUIWebViewWithLocalData{
     NSString *htmlFile = [[NSBundle mainBundle] pathForResource:@"index" ofType:@"html"];
     NSString* htmlString = [NSString stringWithContentsOfFile:htmlFile encoding:NSUTF8StringEncoding error:nil];
-    [self.uiWebView loadHTMLString:htmlString baseURL:[NSURL URLWithString:@"http://equinocios.com"]];
+    [self.uiWebView loadHTMLString:htmlString baseURL:[NSURL URLWithString:ABSOLUTE_URL]];
 }
 #pragma mark UIWebView Delegate
 -(void)webViewDidStartLoad:(UIWebView *)webView{
@@ -178,7 +179,7 @@
 -(instancetype)initWithCoder:(NSCoder *)aDecoder{
     self = [super initWithCoder:aDecoder];
     if (self) {
-        [self setupUIWebView];
+        [self setupWKWebView];
         
     }
     return self;
@@ -187,9 +188,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [self layoutUIWebView];
+    [self layoutWKWebView];
     
-    [self loadUIWebViewWithUrl:@"http://equinocios.com"];
+    [self loadWKWebViewWithUrl:ABSOLUTE_URL];
     
 //    [self loadUIWebViewWithLocalData];
     
@@ -197,13 +198,14 @@
 }
 
 - (IBAction)goAbout:(id)sender {
-    [self loadUIWebViewWithUrl:@"http://equinocios.com/about"];
+    NSString *aboutUrl = [NSString stringWithFormat:@"%@/about",ABSOLUTE_URL];
+    [self loadWKWebViewWithUrl:aboutUrl];
 }
 - (IBAction)goBack:(id)sender {
-    [self uiWebViewGoBack];
+    [self wkWebViewGoBack];
 }
 - (IBAction)refresh:(id)sender {
-    [self uiWebViewReload];
+    [self wkWebViewReload];
 }
 - (IBAction)login:(id)sender {
     
