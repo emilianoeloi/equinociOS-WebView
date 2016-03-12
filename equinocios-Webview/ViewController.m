@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 static NSString *ABSOLUTE_URL=@"http://equinocios.com";
+typedef void (^WKCookieCompletion)(NSString *cookieValue);
 
 @interface ViewController () <WKNavigationDelegate, WKUIDelegate, UIWebViewDelegate, WKScriptMessageHandler>
 
@@ -52,6 +53,24 @@ static NSString *ABSOLUTE_URL=@"http://equinocios.com";
     return nil;
 }
 
+-(void)wkSaveCookie:(NSString *)key value:(NSString *)value{
+    NSString *js = [NSString stringWithFormat:@"window.cookieMng.set('%@','%@');",key,value];
+    [self.wkWebView evaluateJavaScript:js completionHandler:nil];
+}
+-(void)wkDeleteCookie:(NSString *)key{
+    NSString *js = [NSString stringWithFormat:@"window.cookieMng.delete('%@');",key];
+    [self.wkWebView evaluateJavaScript:js completionHandler:nil];
+}
+-(void)wkCookie:(NSString *)key completion:(WKCookieCompletion)completion{
+    NSString *js = [NSString stringWithFormat:@"window.cookieMng.get('%@');",key];
+    [self.wkWebView evaluateJavaScript:js completionHandler:^(id jsReturn, NSError * error) {
+        NSString *local = [NSString stringWithFormat:@"%@",jsReturn];
+        if ([local isEqualToString:@""]) {
+            completion(nil);
+        }
+        completion(jsReturn);
+    }];
+}
 
 - (void)injectJavascript:(NSString *)resource {
     NSString *jsPath = [[NSBundle mainBundle] pathForResource:resource ofType:@"js"];
@@ -164,6 +183,10 @@ static NSString *ABSOLUTE_URL=@"http://equinocios.com";
     NSString *js = [NSString stringWithContentsOfFile:jsPath encoding:NSUTF8StringEncoding error:NULL];
     [self.wkWebView evaluateJavaScript:js completionHandler:nil];
     
+    [self wkCookie:@"userName" completion:^(NSString *cookieValue) {
+        self.username.title = cookieValue?:@"Login";
+    }];
+    
 }
 -(void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message{
     self.navigationItem.title = message.body;
@@ -191,10 +214,6 @@ static NSString *ABSOLUTE_URL=@"http://equinocios.com";
     [self layoutWKWebView];
     
     [self loadWKWebViewWithUrl:ABSOLUTE_URL];
-    
-//    [self loadUIWebViewWithLocalData];
-    
-    
 }
 
 - (IBAction)goAbout:(id)sender {
@@ -212,14 +231,14 @@ static NSString *ABSOLUTE_URL=@"http://equinocios.com";
     NSString *username = @"Matilda";
     NSString *cookieKey = @"userName";
     
-    [self saveCookie:cookieKey value:username];
+    [self wkSaveCookie:cookieKey value:username];
     
     self.username.title = username;
     
 }
 - (IBAction)logout:(id)sender {
     NSString *cookieKey = @"userName";
-    [self deleteCookie:cookieKey];
+    [self wkDeleteCookie:cookieKey];
     self.username.title = @"Login";
 }
 

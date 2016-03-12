@@ -5,18 +5,32 @@ A Porta de entrada pra o desenvolvedor web
 
 Os aplicativos chegaram pra valer nas empresas, só que elas estão acabando de se tornar fluentes em mobile web. É natural ver o caminho de colocar o site mobile dentro de uma app, - Já tenho um site que parece um App! Porque não usar o mesmo? Eu acredito que em boa parte dos casos isso pode ser feito, mas é preciso ficar de olhos nos detalhes de implementação e principalmente a expectativa do usuário, afinal de contas é uma App e uma App de ver voar, no mínimo. 
 
-Participei de dois projetos em que o problema era criar uma "casca" para um site, e o interessante e que nos dois casos os requisitos não ficaram apenas no abertura do site simplesmente, o site deveria interagir a parte nativa do aplicativo, e aí que o desafio aumenta. Segue pontos que considero importante pra a implementação da webView
-
- - Ponte JS/Objc
- - Cookies
- - Cache
- - Performance
-
 - Ponte de comunicação Javascript/Objective-C
 
 O premeiro desafio é fazer essa conversa acontecer, a velha UIWebView não apresenta uma forma objetiva de executar javascript, e dessa forma nada de conversa fácil ente código nativo e Javascript. 
  - ObjC to JS
 Para enviar um javascript para a página, será necessário incluir o código no método 'webView: shouldStartLoadWithRequest: navigationType:', assim antes do carregamento da página é possível incluir no seu contexto qualquer código JS.
+
+```javascript
+(function(){
+    window.isInnerEquinocios = function(){
+        return document.location.hostname == "equinocios.com"
+    }
+    window.hideHeader = function(){
+        var nav = document.querySelector("nav");
+        if(nav && window.isInnerEquinocios()){
+            document.body.removeChild(nav);
+        }
+    }
+    window.changeNavTitle = function(){
+        document.location.href = "JStoObjC://title="+document.title;
+    }
+    window.onload = function(){
+        window.hideHeader();
+        window.changeNavTitle();
+    }
+})();
+```
 
 ```objc
 - (void)injectJavascript:(NSString *)resource {
@@ -71,11 +85,63 @@ O Projeto 'WebViewJavascriptBridge' de 'Marcus Westin' faz o trabalho descrito a
 
 O formato acima só seria mandatório para atender a ~6% de base de dispositivos que ainda rodam o iOS7, entretanto para os dispositivos com as versões do iOS 8+ está disponível a WebKit WebView, que é inclusive uma recomendação de uso da Apple para essas versões de iOS. A comunicação Javascript/Código Nativo já está em um nível bem superior.
 
--JStoObjC
-[código]
+-Javascript
+```javascript
+(function(){
+    window.isInnerEquinocios = function(){
+        return document.location.hostname == "equinocios.com"
+    }
+    window.hideHeader = function(){
+        var nav = document.querySelector("nav");
+        if(nav && window.isInnerEquinocios()){
+            document.body.removeChild(nav);
+        }
+    }
+    window.changeNavTitle = function(){
+        setTimeout(function(){
+            window.webkit.messageHandlers.observe.postMessage(document.title);
+        },1000);
+    }
+    window.onload = function(){
+        window.hideHeader();
+        window.changeNavTitle();
+    }
+})()
+```
 
--ObjeCtoJS
-[código]
+-JStoObjC
+A parte pesada aqui fica por conta do setup, no qual será necessário instanciar o 'WKUserContenetController' e adicionar o 'messageHandler', e com a implementação do método 'userContentController:didReceiveScriptMessage:'.
+```objc
+@interface ViewController () <WKNavigationDelegate, WKUIDelegate, UIWebViewDelegate, WKScriptMessageHandler>
+``` 
+```objc
+-(void)setupWKWebView{
+    WKWebViewConfiguration *theConfiguration = [[WKWebViewConfiguration alloc] init];
+    WKUserContentController *controller = [[WKUserContentController alloc]init];
+    [controller addScriptMessageHandler:self name:@"observe"];
+    
+    [theConfiguration setUserContentController:controller];
+    self.wkWebView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:theConfiguration];
+    
+    self.wkWebView.navigationDelegate = self;
+    self.wkWebView.UIDelegate = self;
+}
+```
+```objc
+-(void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message{
+    self.navigationItem.title = message.body;
+}
+```
+-ObjCtoJS
+```objc
+-(void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation{
+    
+    NSString *jsPath = [[NSBundle mainBundle] pathForResource:@"wk_script" ofType:@"js"];
+    NSString *js = [NSString stringWithContentsOfFile:jsPath encoding:NSUTF8StringEncoding error:NULL];
+    [self.wkWebView evaluateJavaScript:js completionHandler:nil];
+    
+}
+```
 
 - Trabalhando com Cookies
 
