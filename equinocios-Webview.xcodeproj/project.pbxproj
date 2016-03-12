@@ -17,6 +17,7 @@
 		AC2868C21C93941F006717BD /* equinocios_WebviewUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = AC2868C11C93941F006717BD /* equinocios_WebviewUITests.m */; };
 		AC2868D01C93A580006717BD /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC2868CF1C93A580006717BD /* WebKit.framework */; };
 		AC2868D21C93BDDD006717BD /* scripts.js in Resources */ = {isa = PBXBuildFile; fileRef = AC2868D11C93BDDD006717BD /* scripts.js */; };
+		AC2868D41C944AA5006717BD /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = AC2868D31C944AA5006717BD /* index.html */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,7 @@
 		AC2868C31C93941F006717BD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AC2868CF1C93A580006717BD /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		AC2868D11C93BDDD006717BD /* scripts.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = scripts.js; sourceTree = "<group>"; };
+		AC2868D31C944AA5006717BD /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,6 +125,7 @@
 		AC28689C1C93941F006717BD /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				AC2868D31C944AA5006717BD /* index.html */,
 				AC2868D11C93BDDD006717BD /* scripts.js */,
 				AC28689D1C93941F006717BD /* main.m */,
 			);
@@ -250,6 +253,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC2868D41C944AA5006717BD /* index.html in Resources */,
 				AC2868AC1C93941F006717BD /* LaunchScreen.storyboard in Resources */,
 				AC2868D21C93BDDD006717BD /* scripts.js in Resources */,
 				AC2868A91C93941F006717BD /* Assets.xcassets in Resources */,

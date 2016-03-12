@@ -94,8 +94,29 @@ Começando com a UIWebView, a manipulação de cookies se dá de forma muito efi
 
  - Deletando um Cookie 
  ```Objective-C
-
+-(void)deleteCookie:(NSString *)key{
+    NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+    for (NSHTTPCookie *cookie in [storage cookies]) {
+        if ([cookie.name isEqualToString:key]) {
+            [storage deleteCookie:cookie];
+        }
+    }
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
  ```
+
+ - Obtendo um Cookie
+```Objective-C
+-(NSString *)cookie:(NSString *)key{
+    NSArray *httpCookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
+    for (NSHTTPCookie *cookie in httpCookies) {
+        if([[cookie name] isEqualToString:key]){
+            return [cookie value];
+        }
+    }
+    return nil;
+}
+``` 
 
 Já para Manipular o cookie na WK precisaremos trabalhar com uma implementação javascript, vejo isso como um benefício já que o time de web poderá fazer implementações otimizadas de acordo com sua necessidade. Para criar um cookie é necessário que, além de executar o script de criação do Cookie, que página seja carregada na sua totalidade para que o cookie seja criado/deletado efetivamente.
 
@@ -103,11 +124,33 @@ Já para Manipular o cookie na WK precisaremos trabalhar com uma implementação
 
 - Cache e Performance
 
-Nesse ponto que as coisas começam a complicar, se seu conteúdo for muito grande e complexo, um exemplo disso é um feed de notícias com muitas imagens, processamento, chamadas ajax, não haverá cache que ajudará um segundo carregamento, já que para uma página web não é apenas a obtenção dos dados que a tornará de rápido carregamento. Para um desenvolvedor web, uma app é um site são a mesma coisa em questão de performance, ou seja, um usuário leito não saberia identificar o que é o que, e de certa forma um leigo não seria capaz de apontar um ou outro. Mas não se trata disso, se trata do cenário, se tivermos falando de um conteúdo complexo, um aplicativo tem um trabalho de renderizar na tela a uma taxa de 60 frames por sengundo o que foi desenhado pelo desevolvedor, em uma webview as coisas são diferentes, o processo de renderização de um html baseado em sua forlha de estilos em castaca torna a renderização web, mesmo que bem otimizada um passo atrás do nativo, por que ele tem um processo de respan e repaint, ou seja, quando se decidi fazer uma app com webview você está lutando contra a expectativa do usuário, e contra a tecnologia. O usuário sempre espera uma performance melhor de uma App, quando ele está no navegador ele já entendo que ele chamará uma página e ela vai ficar ali alguns segundos se ajeitando da ali e de lá.
+Nesse ponto que as coisas começam a complicar, o que se espera de um aplicativo é que seja performático e uma webview nem sempre entrega isso de forma aceitável, caso seu conteúdo seja complexo, com muitas imagens, fontes customizadas, chamadas ajax etc isso tende a degradar o carregamento das páginas e não haverá cache que ajudará um segundo carregamento, já que além da obtenção dos dados o que torna uma página web rápida é também como ela foi construída. 
+A política de cache padrão de um request é a 'NSURLRequestUseProtocolCachePolicy' a imagem a baixo (obtida da própria referência da apple) descreve seu comportamente. existem algumas outras políticas de para os diversos casos.
 
-[Código]
+ - Request com política de Cache
+ ```Objective-C
+ -(void)loadWKWebViewWithUrl:(NSString *)absoluteUrl{
+    NSURL *url = [NSURL URLWithString:absoluteUrl];
+    NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:1.0];
+    [_wkWebView loadRequest:request];
+}
+ ```
 
-Mesmo que escolhamos a opção de colocarmos o html embarcado ele ainda terá o passo atrás de renderizar HTML+CSS+Javascript e não uma View da plataforma.
+No caso de utilização de webview é notório o consumo de memória, em específico da UIWebView em iOS 8+, e limpar o cache em caso de MemoryWarning ajudará a manter o bom funcionamento do seu aplicativo.
+
+"In apps that run in iOS 8 and later, use the WKWebView class instead of using UIWebView. Additionally, consider setting the WKPreferences property javaScriptEnabled to false if you render files that are not supposed to run JavaScript." UIWebView Reference
+
+ - Limpar cache
+ ```Objective-C
+ - (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    [[NSURLCache sharedURLCache] removeAllCachedResponses];
+    [[NSURLCache sharedURLCache] setDiskCapacity:0];
+    [[NSURLCache sharedURLCache] setMemoryCapacity:0];
+}
+ ``` 
+
+E mesmo que a escolha seja a de colocar o html embarcado ele ainda terá o passo atrás de renderizar HTML+CSS+Javascript e não uma View da plataforma.
 
 [Código]
 
@@ -151,7 +194,10 @@ Agradeço Sohorio pela inciativa do projeto do EquinociOS e a todos os membros d
 AppStore - https://developer.apple.com/support/app-store/ - acessado em 12/03/2016
 WebViewJavascriptBridge - https://github.com/marcuswestin/WebViewJavascriptBridge - acessado em 12/03/2016
 NSHTTPCookieStorage - https://developer.apple.com/library/mac/documentation/Cocoa/Reference/Foundation/Classes/NSHTTPCookieStorage_Class/ - acessado em 12/03/2016
+Minimizing browser reflow - https://developers.google.com/speed/articles/reflow#guidelines - acessado em 12/03/2016
 
 Esse é mais um assunto que diz respeito a todas as plataformas, duas dessas eu tenho um contato maior, que são Android e obviamente o iOS. Quando se pensa em desenvolver com uma estrutura unificada nada mais natural para um time que pensar em continuar fazendo isso pra web. E isso é perfeitamente possível. Continuar no app uma experiência que é bem sucedida da web.
+
+Para um desenvolvedor web, uma app é um site são a mesma coisa em questão de performance, ou seja, um usuário leito não saberia identificar o que é o que, e de certa forma um leigo não seria capaz de apontar um ou outro. Mas não se trata disso, se trata do cenário, se tivermos falando de um conteúdo complexo, um aplicativo tem um trabalho de renderizar na tela a uma taxa de 60 frames por sengundo o que foi desenhado pelo desevolvedor, em uma webview as coisas são diferentes, o processo de renderização de um html baseado em sua forlha de estilos em castaca torna a renderização web, mesmo que bem otimizada um passo atrás do nativo, por que ele tem um processo de reflow e repaint, ou seja, quando se decidi fazer uma app com webview você está lutando contra a expectativa do usuário, e contra a tecnologia. O usuário sempre espera uma performance melhor de uma App, quando ele está no navegador ele já entendo que ele chamará uma página e ela vai ficar ali alguns segundos se ajeitando da ali e de lá.
 
 A UIWebview está presente desde d versão 2 da SDK,

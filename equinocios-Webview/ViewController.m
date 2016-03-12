@@ -55,6 +55,11 @@
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     [_uiWebView loadRequest:request];
 }
+-(void)loadUIWebViewWithLocalData{
+    NSString *htmlFile = [[NSBundle mainBundle] pathForResource:@"index" ofType:@"html"];
+    NSString* htmlString = [NSString stringWithContentsOfFile:htmlFile encoding:NSUTF8StringEncoding error:nil];
+    [self.uiWebView loadHTMLString:htmlString baseURL:[NSURL URLWithString:@"http://equinocios.com"]];
+}
 #pragma mark UIWebView Delegate
 -(void)webViewDidStartLoad:(UIWebView *)webView{
     self.navigationItem.title = @"Carregando...";
@@ -93,7 +98,7 @@
 }
 -(void)loadWKWebViewWithUrl:(NSString *)absoluteUrl{
     NSURL *url = [NSURL URLWithString:absoluteUrl];
-    NSURLRequest *request = [NSURLRequest requestWithURL:url];
+    NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:1.0];
     [_wkWebView loadRequest:request];
 }
 
@@ -145,7 +150,9 @@
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+    [[NSURLCache sharedURLCache] removeAllCachedResponses];
+    [[NSURLCache sharedURLCache] setDiskCapacity:0];
+    [[NSURLCache sharedURLCache] setMemoryCapacity:0];
 }
 
 #pragma mark Cookies
