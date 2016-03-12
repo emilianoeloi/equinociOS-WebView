@@ -70,12 +70,32 @@ O formato acima só seria mandatório para atender a ~6% de base de dispositivos
 -ObjeCtoJS
 [código]
 
-- Gerenciando Cookies
+- Trabalhando com Cookies
 
-Mas nem tudo são flores, o WebView do WebKit não consegue usar de forma satisfatória o 'NSHTTPCookieStorage', e nesse caso o potencial Javascript deve ser utilizado no processo de manipulação de cookies.
+Mas nem tudo são flores, o WebView do WebKit não consegue usar de forma satisfatória o 'NSHTTPCookieStorage', e nesse caso o potencial Javascript deve ser utilizado no processo de manipulação de cookies. Caso o seu projeto tenha por exemplo, um login nativo e que precise passar o token para a página para manar o usuário logado na web você vai precisar escrever, deletar ou ler cookies da Webview. 
 Começando com a UIWebView, a manipulação de cookies se dá de forma muito eficiente utilizando o 'NSHTTPCookieStorage'.
 
-[código]
+ - Gravando um Cookie
+```Objective-C
+-(void)saveCookie:(NSString *)key value:(NSString *)value{
+    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+    [cookieProperties setObject:key forKey:NSHTTPCookieName];
+    [cookieProperties setObject:value forKey:NSHTTPCookieValue];
+    [cookieProperties setObject:@"equinocios.com" forKey:NSHTTPCookieDomain];
+    [cookieProperties setObject:@"equinocios.com" forKey:NSHTTPCookieOriginURL];
+    [cookieProperties setObject:@"/" forKey:NSHTTPCookiePath];
+    [cookieProperties setObject:@"0" forKey:NSHTTPCookieVersion];
+    
+    NSHTTPCookie *cookie = [NSHTTPCookie cookieWithProperties:cookieProperties];
+    [[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookie:cookie];
+
+}
+```
+
+ - Deletando um Cookie 
+ ```Objective-C
+
+ ```
 
 Já para Manipular o cookie na WK precisaremos trabalhar com uma implementação javascript, vejo isso como um benefício já que o time de web poderá fazer implementações otimizadas de acordo com sua necessidade. Para criar um cookie é necessário que, além de executar o script de criação do Cookie, que página seja carregada na sua totalidade para que o cookie seja criado/deletado efetivamente.
 
@@ -130,6 +150,7 @@ Agradeço Sohorio pela inciativa do projeto do EquinociOS e a todos os membros d
 - Referências
 AppStore - https://developer.apple.com/support/app-store/ - acessado em 12/03/2016
 WebViewJavascriptBridge - https://github.com/marcuswestin/WebViewJavascriptBridge - acessado em 12/03/2016
+NSHTTPCookieStorage - https://developer.apple.com/library/mac/documentation/Cocoa/Reference/Foundation/Classes/NSHTTPCookieStorage_Class/ - acessado em 12/03/2016
 
 Esse é mais um assunto que diz respeito a todas as plataformas, duas dessas eu tenho um contato maior, que são Android e obviamente o iOS. Quando se pensa em desenvolver com uma estrutura unificada nada mais natural para um time que pensar em continuar fazendo isso pra web. E isso é perfeitamente possível. Continuar no app uma experiência que é bem sucedida da web.
 

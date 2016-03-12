@@ -73,15 +73,8 @@
     return YES;
 }
 -(void)webViewDidFinishLoad:(UIWebView *)webView{
-    NSURL *url = [NSURL URLWithString:@"http://equinocios.com"];
-    NSArray *httpCookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookiesForURL:url];
-    httpCookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
-    for (NSHTTPCookie *cookie in httpCookies) {
-        if([[cookie name] isEqualToString:@"userName"]){
-            NSLog(@"Usuário logado: %@",[cookie value]);
-            self.username.title = [cookie value];
-        }
-    }
+    self.username.title = [self cookie:@"userName"]?:@"Login";
+    
 }
 
 #pragma mark WKWebView
@@ -136,29 +129,16 @@
 - (IBAction)login:(id)sender {
     
     NSString *username = @"Matilda";
+    NSString *cookieKey = @"userName";
     
-    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    [cookieProperties setObject:@"userName" forKey:NSHTTPCookieName];
-    [cookieProperties setObject:username forKey:NSHTTPCookieValue];
-    [cookieProperties setObject:@"equinocios.com" forKey:NSHTTPCookieDomain];
-    [cookieProperties setObject:@"equinocios.com" forKey:NSHTTPCookieOriginURL];
-    [cookieProperties setObject:@"/" forKey:NSHTTPCookiePath];
-    [cookieProperties setObject:@"0" forKey:NSHTTPCookieVersion];
-    
-    NSHTTPCookie *cookie = [NSHTTPCookie cookieWithProperties:cookieProperties];
-    [[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookie:cookie];
+    [self saveCookie:cookieKey value:username];
     
     self.username.title = username;
     
 }
 - (IBAction)logout:(id)sender {
-    NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
-    for (NSHTTPCookie *cookie in [storage cookies]) {
-        if ([cookie.name isEqualToString:@"userName"]) {
-            [storage deleteCookie:cookie];
-        }
-    }
-    [[NSUserDefaults standardUserDefaults] synchronize];
+    NSString *cookieKey = @"userName";
+    [self deleteCookie:cookieKey];
     self.username.title = @"Login";
 }
 
@@ -166,6 +146,39 @@
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma mark Cookies
+-(void)saveCookie:(NSString *)key value:(NSString *)value{
+    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+    [cookieProperties setObject:key forKey:NSHTTPCookieName];
+    [cookieProperties setObject:value forKey:NSHTTPCookieValue];
+    [cookieProperties setObject:@"equinocios.com" forKey:NSHTTPCookieDomain];
+    [cookieProperties setObject:@"equinocios.com" forKey:NSHTTPCookieOriginURL];
+    [cookieProperties setObject:@"/" forKey:NSHTTPCookiePath];
+    [cookieProperties setObject:@"0" forKey:NSHTTPCookieVersion];
+    
+    NSHTTPCookie *cookie = [NSHTTPCookie cookieWithProperties:cookieProperties];
+    [[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookie:cookie];
+
+}
+-(void)deleteCookie:(NSString *)key{
+    NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+    for (NSHTTPCookie *cookie in [storage cookies]) {
+        if ([cookie.name isEqualToString:key]) {
+            [storage deleteCookie:cookie];
+        }
+    }
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(NSString *)cookie:(NSString *)key{
+    NSArray *httpCookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
+    for (NSHTTPCookie *cookie in httpCookies) {
+        if([[cookie name] isEqualToString:key]){
+            return [cookie value];
+        }
+    }
+    return nil;
 }
 
 @end
