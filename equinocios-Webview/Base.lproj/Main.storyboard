@@ -5,7 +5,7 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--EquinociOS-->
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
@@ -16,9 +16,37 @@
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NWo-IM-eEA">
+                                <rect key="frame" x="0.0" y="556" width="600" height="44"/>
+                                <items>
+                                    <barButtonItem title="Voltar" id="asR-jj-w1t">
+                                        <connections>
+                                            <action selector="goBack:" destination="BYZ-38-t0r" id="7Wc-Q5-uXI"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem title="Refresh" id="BlX-pm-9Z9">
+                                        <connections>
+                                            <action selector="refresh:" destination="BYZ-38-t0r" id="rYh-cg-3lo"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </items>
+                            </toolbar>
+                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="NWo-IM-eEA" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="9P7-5R-1sk"/>
+                            <constraint firstAttribute="trailing" secondItem="NWo-IM-eEA" secondAttribute="trailing" id="HW7-oQ-hvO"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="NWo-IM-eEA" secondAttribute="bottom" id="v9I-La-BK7"/>
+                        </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="6hK-uc-ZHH"/>
+                    <navigationItem key="navigationItem" title="EquinociOS" id="2DL-db-yF7">
+                        <barButtonItem key="rightBarButtonItem" title="Sobre" id="wzY-zL-0aY">
+                            <connections>
+                                <action selector="goAbout:" destination="BYZ-38-t0r" id="fC3-yN-YHy"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>

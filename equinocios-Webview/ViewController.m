@@ -10,6 +10,7 @@
 
 @interface ViewController () <WKNavigationDelegate, WKUIDelegate, UIWebViewDelegate>
 
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *goAbout;
 @property (nonatomic, strong) UIWebView *uiWebView;
 @property (nonatomic, strong) WKWebView *wkWebView;
 
@@ -23,7 +24,19 @@
     
     [self.uiWebView stringByEvaluatingJavaScriptFromString:js];
 }
-
+-(BOOL)isJStoObjcSchema:(NSString *)url{
+    return [url rangeOfString:@"JStoObjC://"].location != NSNotFound;
+}
+-(NSString *) titleWithUrl:(NSString *)url{
+    NSString *title;
+    NSArray *urlParts = [url componentsSeparatedByString:@"="];
+    if (urlParts) {
+        title = urlParts[1];
+        title = [title stringByRemovingPercentEncoding];
+        
+    }
+    return title;
+}
 #pragma mark WebView
 -(void)setupUIWebView{
     self.uiWebView = [[UIWebView alloc] initWithFrame:CGRectZero];
@@ -32,17 +45,28 @@
 -(void)layoutUIWebView{
     [self.view addSubview:_uiWebView];
     [self.uiWebView setTranslatesAutoresizingMaskIntoConstraints:NO];
-    NSLayoutConstraint *height = [NSLayoutConstraint constraintWithItem:self.uiWebView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeHeight multiplier:1 constant:0];
+    NSLayoutConstraint *height = [NSLayoutConstraint constraintWithItem:self.uiWebView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeHeight multiplier:1 constant:-40];
     NSLayoutConstraint *width = [NSLayoutConstraint constraintWithItem:self.uiWebView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:1 constant:0];
     [self.view addConstraints:@[height, width]];
 }
--(void)loadUIWebView{
-    NSURL *url = [NSURL URLWithString:@"http://equinocios.com"];
+-(void)loadUIWebViewWithUrl:(NSString *)absoluteUrl{
+    NSURL *url = [NSURL URLWithString:absoluteUrl];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     [_uiWebView loadRequest:request];
 }
 #pragma mark UIWebView Delegate
+-(void)webViewDidStartLoad:(UIWebView *)webView{
+    self.navigationItem.title = @"Carregando...";
+}
 -(BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType{
+    
+    NSString *absoluteUrl = [request URL].absoluteString;
+    
+    if([self isJStoObjcSchema:absoluteUrl]){
+        self.navigationItem.title = [self titleWithUrl:absoluteUrl];
+        return NO;
+    }
+    
     [self injectJavascript:@"scripts"];
     NSLog(@"shoulrStart: %@",[request URL]);
     return YES;
@@ -62,8 +86,8 @@
     NSLayoutConstraint *width = [NSLayoutConstraint constraintWithItem:self.wkWebView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:1 constant:0];
     [self.view addConstraints:@[height, width]];
 }
--(void)loadWKWebView{
-    NSURL *url = [NSURL URLWithString:@"http://equinocios.com"];
+-(void)loadWKWebViewWithUrl:(NSString *)absoluteUrl{
+    NSURL *url = [NSURL URLWithString:absoluteUrl];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     [_wkWebView loadRequest:request];
 }
@@ -82,9 +106,20 @@
     
     [self layoutUIWebView];
     
-    [self loadUIWebView];
+    [self loadUIWebViewWithUrl:@"http://equinocios.com"];
     
 }
+
+- (IBAction)goAbout:(id)sender {
+    [self loadUIWebViewWithUrl:@"http://equinocios.com/about"];
+}
+- (IBAction)goBack:(id)sender {
+    [self.uiWebView goBack];
+}
+- (IBAction)refresh:(id)sender {
+    [self.uiWebView reload];
+}
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
