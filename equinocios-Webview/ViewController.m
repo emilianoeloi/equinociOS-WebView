@@ -8,8 +8,7 @@
 
 #import "ViewController.h"
 
-@interface ViewController () <UIWebViewDelegate>
-// @interface ViewController () <WKNavigationDelegate, WKUIDelegate, UIWebViewDelegate>
+@interface ViewController () <WKNavigationDelegate, WKUIDelegate, UIWebViewDelegate, WKScriptMessageHandler>
 
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *username;
 @property (nonatomic, strong) UIWebView *uiWebView;
@@ -19,6 +18,40 @@
 
 @implementation ViewController
 
+#pragma mark Cookies
+-(void)saveCookie:(NSString *)key value:(NSString *)value{
+    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+    [cookieProperties setObject:key forKey:NSHTTPCookieName];
+    [cookieProperties setObject:value forKey:NSHTTPCookieValue];
+    [cookieProperties setObject:@"equinocios.com" forKey:NSHTTPCookieDomain];
+    [cookieProperties setObject:@"equinocios.com" forKey:NSHTTPCookieOriginURL];
+    [cookieProperties setObject:@"/" forKey:NSHTTPCookiePath];
+    [cookieProperties setObject:@"0" forKey:NSHTTPCookieVersion];
+    
+    NSHTTPCookie *cookie = [NSHTTPCookie cookieWithProperties:cookieProperties];
+    [[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookie:cookie];
+    
+}
+-(void)deleteCookie:(NSString *)key{
+    NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+    for (NSHTTPCookie *cookie in [storage cookies]) {
+        if ([cookie.name isEqualToString:key]) {
+            [storage deleteCookie:cookie];
+        }
+    }
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(NSString *)cookie:(NSString *)key{
+    NSArray *httpCookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
+    for (NSHTTPCookie *cookie in httpCookies) {
+        if([[cookie name] isEqualToString:key]){
+            return [cookie value];
+        }
+    }
+    return nil;
+}
+
+
 - (void)injectJavascript:(NSString *)resource {
     NSString *jsPath = [[NSBundle mainBundle] pathForResource:resource ofType:@"js"];
     NSString *js = [NSString stringWithContentsOfFile:jsPath encoding:NSUTF8StringEncoding error:NULL];
@@ -27,6 +60,10 @@
 }
 -(BOOL)isJStoObjcSchema:(NSString *)url{
     return [url rangeOfString:@"JStoObjC://"].location != NSNotFound;
+}
+-(BOOL)isInnerURL:(NSString *)url{
+    NSLog(@"\n\n --> %@ \n\n", url);
+    return [url rangeOfString:@"http://equinocios.com"].location != NSNotFound;
 }
 -(NSString *) titleWithUrl:(NSString *)url{
     NSString *title;
@@ -73,26 +110,44 @@
         return NO;
     }
     
-    [self injectJavascript:@"scripts"];
-    NSLog(@"shoulrStart: %@",[request URL]);
+    if (![self isInnerURL:absoluteUrl] && navigationType == UIWebViewNavigationTypeLinkClicked) {
+        SFSafariViewController *svc = [[SFSafariViewController alloc]initWithURL:request.URL];
+        [self presentViewController:svc animated:YES completion:^{
+            
+        }];
+        return NO;
+    }
+    
+    [self injectJavascript:@"ui_script"];
     return YES;
 }
 -(void)webViewDidFinishLoad:(UIWebView *)webView{
     self.username.title = [self cookie:@"userName"]?:@"Login";
-    
+}
+#pragma mark UIWebView navigation
+-(void)uiWebViewGoBack{
+    [self.uiWebView goBack];
+}
+-(void)uiWebViewReload{
+    [self.uiWebView reload];
 }
 
 #pragma mark WKWebView
 -(void)setupWKWebView{
     WKWebViewConfiguration *theConfiguration = [[WKWebViewConfiguration alloc] init];
+    WKUserContentController *controller = [[WKUserContentController alloc]init];
+    [controller addScriptMessageHandler:self name:@"observe"];
+    
+    [theConfiguration setUserContentController:controller];
     self.wkWebView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:theConfiguration];
+    
     self.wkWebView.navigationDelegate = self;
     self.wkWebView.UIDelegate = self;
 }
 -(void)layoutWKWebView{
     [self.view addSubview:_wkWebView];
     [self.wkWebView setTranslatesAutoresizingMaskIntoConstraints:NO];
-    NSLayoutConstraint *height = [NSLayoutConstraint constraintWithItem:self.wkWebView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeHeight multiplier:1 constant:0];
+    NSLayoutConstraint *height = [NSLayoutConstraint constraintWithItem:self.wkWebView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeHeight multiplier:1 constant:-40];
     NSLayoutConstraint *width = [NSLayoutConstraint constraintWithItem:self.wkWebView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:1 constant:0];
     [self.view addConstraints:@[height, width]];
 }
@@ -100,6 +155,24 @@
     NSURL *url = [NSURL URLWithString:absoluteUrl];
     NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:1.0];
     [_wkWebView loadRequest:request];
+}
+#pragma mark WKWebView Delegates
+-(void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation{
+    
+    NSString *jsPath = [[NSBundle mainBundle] pathForResource:@"wk_script" ofType:@"js"];
+    NSString *js = [NSString stringWithContentsOfFile:jsPath encoding:NSUTF8StringEncoding error:NULL];
+    [self.wkWebView evaluateJavaScript:js completionHandler:nil];
+    
+}
+-(void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message{
+    self.navigationItem.title = message.body;
+}
+#pragma mark UIWebView navigation
+-(void)wkWebViewGoBack{
+    [self.wkWebView goBack];
+}
+-(void)wkWebViewReload{
+    [self.wkWebView reload];
 }
 
 -(instancetype)initWithCoder:(NSCoder *)aDecoder{
@@ -118,6 +191,7 @@
     
     [self loadUIWebViewWithUrl:@"http://equinocios.com"];
     
+//    [self loadUIWebViewWithLocalData];
     
     
 }
@@ -126,10 +200,10 @@
     [self loadUIWebViewWithUrl:@"http://equinocios.com/about"];
 }
 - (IBAction)goBack:(id)sender {
-    [self.uiWebView goBack];
+    [self uiWebViewGoBack];
 }
 - (IBAction)refresh:(id)sender {
-    [self.uiWebView reload];
+    [self uiWebViewReload];
 }
 - (IBAction)login:(id)sender {
     
@@ -153,39 +227,6 @@
     [[NSURLCache sharedURLCache] removeAllCachedResponses];
     [[NSURLCache sharedURLCache] setDiskCapacity:0];
     [[NSURLCache sharedURLCache] setMemoryCapacity:0];
-}
-
-#pragma mark Cookies
--(void)saveCookie:(NSString *)key value:(NSString *)value{
-    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
-    [cookieProperties setObject:key forKey:NSHTTPCookieName];
-    [cookieProperties setObject:value forKey:NSHTTPCookieValue];
-    [cookieProperties setObject:@"equinocios.com" forKey:NSHTTPCookieDomain];
-    [cookieProperties setObject:@"equinocios.com" forKey:NSHTTPCookieOriginURL];
-    [cookieProperties setObject:@"/" forKey:NSHTTPCookiePath];
-    [cookieProperties setObject:@"0" forKey:NSHTTPCookieVersion];
-    
-    NSHTTPCookie *cookie = [NSHTTPCookie cookieWithProperties:cookieProperties];
-    [[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookie:cookie];
-
-}
--(void)deleteCookie:(NSString *)key{
-    NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
-    for (NSHTTPCookie *cookie in [storage cookies]) {
-        if ([cookie.name isEqualToString:key]) {
-            [storage deleteCookie:cookie];
-        }
-    }
-    [[NSUserDefaults standardUserDefaults] synchronize];
-}
--(NSString *)cookie:(NSString *)key{
-    NSArray *httpCookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
-    for (NSHTTPCookie *cookie in httpCookies) {
-        if([[cookie name] isEqualToString:key]){
-            return [cookie value];
-        }
-    }
-    return nil;
 }
 
 @end

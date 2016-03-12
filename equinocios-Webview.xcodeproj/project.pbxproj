@@ -16,8 +16,10 @@
 		AC2868B71C93941F006717BD /* equinocios_WebviewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AC2868B61C93941F006717BD /* equinocios_WebviewTests.m */; };
 		AC2868C21C93941F006717BD /* equinocios_WebviewUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = AC2868C11C93941F006717BD /* equinocios_WebviewUITests.m */; };
 		AC2868D01C93A580006717BD /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC2868CF1C93A580006717BD /* WebKit.framework */; };
-		AC2868D21C93BDDD006717BD /* scripts.js in Resources */ = {isa = PBXBuildFile; fileRef = AC2868D11C93BDDD006717BD /* scripts.js */; };
 		AC2868D41C944AA5006717BD /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = AC2868D31C944AA5006717BD /* index.html */; };
+		AC2868D61C9465E6006717BD /* ui_script.js in Resources */ = {isa = PBXBuildFile; fileRef = AC2868D51C9465E6006717BD /* ui_script.js */; };
+		AC2868D81C9465EE006717BD /* wk_script.js in Resources */ = {isa = PBXBuildFile; fileRef = AC2868D71C9465EE006717BD /* wk_script.js */; };
+		AC2868DA1C948727006717BD /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC2868D91C948727006717BD /* SafariServices.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,8 +57,10 @@
 		AC2868C11C93941F006717BD /* equinocios_WebviewUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = equinocios_WebviewUITests.m; sourceTree = "<group>"; };
 		AC2868C31C93941F006717BD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AC2868CF1C93A580006717BD /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		AC2868D11C93BDDD006717BD /* scripts.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = scripts.js; sourceTree = "<group>"; };
 		AC2868D31C944AA5006717BD /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
+		AC2868D51C9465E6006717BD /* ui_script.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = ui_script.js; sourceTree = "<group>"; };
+		AC2868D71C9465EE006717BD /* wk_script.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = wk_script.js; sourceTree = "<group>"; };
+		AC2868D91C948727006717BD /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +68,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC2868DA1C948727006717BD /* SafariServices.framework in Frameworks */,
 				AC2868D01C93A580006717BD /* WebKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -88,6 +93,7 @@
 		AC2868901C93941F006717BD = {
 			isa = PBXGroup;
 			children = (
+				AC2868D91C948727006717BD /* SafariServices.framework */,
 				AC2868CF1C93A580006717BD /* WebKit.framework */,
 				AC28689B1C93941F006717BD /* equinocios-Webview */,
 				AC2868B51C93941F006717BD /* equinocios-WebviewTests */,
@@ -126,7 +132,8 @@
 			isa = PBXGroup;
 			children = (
 				AC2868D31C944AA5006717BD /* index.html */,
-				AC2868D11C93BDDD006717BD /* scripts.js */,
+				AC2868D51C9465E6006717BD /* ui_script.js */,
+				AC2868D71C9465EE006717BD /* wk_script.js */,
 				AC28689D1C93941F006717BD /* main.m */,
 			);
 			name = "Supporting Files";
@@ -254,9 +261,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC2868D41C944AA5006717BD /* index.html in Resources */,
+				AC2868D81C9465EE006717BD /* wk_script.js in Resources */,
 				AC2868AC1C93941F006717BD /* LaunchScreen.storyboard in Resources */,
-				AC2868D21C93BDDD006717BD /* scripts.js in Resources */,
 				AC2868A91C93941F006717BD /* Assets.xcassets in Resources */,
+				AC2868D61C9465E6006717BD /* ui_script.js in Resources */,
 				AC2868A71C93941F006717BD /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
