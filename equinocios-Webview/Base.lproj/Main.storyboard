@@ -20,7 +20,7 @@
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NWo-IM-eEA">
                                 <rect key="frame" x="0.0" y="556" width="600" height="44"/>
                                 <items>
-                                    <barButtonItem title="Voltar" id="asR-jj-w1t">
+                                    <barButtonItem title="Back" id="asR-jj-w1t">
                                         <connections>
                                             <action selector="goBack:" destination="BYZ-38-t0r" id="7Wc-Q5-uXI"/>
                                         </connections>
@@ -28,6 +28,16 @@
                                     <barButtonItem title="Refresh" id="BlX-pm-9Z9">
                                         <connections>
                                             <action selector="refresh:" destination="BYZ-38-t0r" id="rYh-cg-3lo"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem title="Login" id="Ha5-KS-tNg">
+                                        <connections>
+                                            <action selector="login:" destination="BYZ-38-t0r" id="4Mx-Yc-Pb6"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem title="Logout" id="uEy-4Z-y8E">
+                                        <connections>
+                                            <action selector="logout:" destination="BYZ-38-t0r" id="8J3-bL-vUp"/>
                                         </connections>
                                     </barButtonItem>
                                 </items>
@@ -47,6 +57,9 @@
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="username" destination="Ha5-KS-tNg" id="db6-7J-OCj"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>

@@ -8,9 +8,10 @@
 
 #import "ViewController.h"
 
-@interface ViewController () <WKNavigationDelegate, WKUIDelegate, UIWebViewDelegate>
+@interface ViewController () <UIWebViewDelegate>
+// @interface ViewController () <WKNavigationDelegate, WKUIDelegate, UIWebViewDelegate>
 
-@property (weak, nonatomic) IBOutlet UIBarButtonItem *goAbout;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *username;
 @property (nonatomic, strong) UIWebView *uiWebView;
 @property (nonatomic, strong) WKWebView *wkWebView;
 
@@ -71,6 +72,17 @@
     NSLog(@"shoulrStart: %@",[request URL]);
     return YES;
 }
+-(void)webViewDidFinishLoad:(UIWebView *)webView{
+    NSURL *url = [NSURL URLWithString:@"http://equinocios.com"];
+    NSArray *httpCookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookiesForURL:url];
+    httpCookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies];
+    for (NSHTTPCookie *cookie in httpCookies) {
+        if([[cookie name] isEqualToString:@"userName"]){
+            NSLog(@"Usuário logado: %@",[cookie value]);
+            self.username.title = [cookie value];
+        }
+    }
+}
 
 #pragma mark WKWebView
 -(void)setupWKWebView{
@@ -108,6 +120,8 @@
     
     [self loadUIWebViewWithUrl:@"http://equinocios.com"];
     
+    
+    
 }
 
 - (IBAction)goAbout:(id)sender {
@@ -118,6 +132,34 @@
 }
 - (IBAction)refresh:(id)sender {
     [self.uiWebView reload];
+}
+- (IBAction)login:(id)sender {
+    
+    NSString *username = @"Matilda";
+    
+    NSMutableDictionary *cookieProperties = [NSMutableDictionary dictionary];
+    [cookieProperties setObject:@"userName" forKey:NSHTTPCookieName];
+    [cookieProperties setObject:username forKey:NSHTTPCookieValue];
+    [cookieProperties setObject:@"equinocios.com" forKey:NSHTTPCookieDomain];
+    [cookieProperties setObject:@"equinocios.com" forKey:NSHTTPCookieOriginURL];
+    [cookieProperties setObject:@"/" forKey:NSHTTPCookiePath];
+    [cookieProperties setObject:@"0" forKey:NSHTTPCookieVersion];
+    
+    NSHTTPCookie *cookie = [NSHTTPCookie cookieWithProperties:cookieProperties];
+    [[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookie:cookie];
+    
+    self.username.title = username;
+    
+}
+- (IBAction)logout:(id)sender {
+    NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+    for (NSHTTPCookie *cookie in [storage cookies]) {
+        if ([cookie.name isEqualToString:@"userName"]) {
+            [storage deleteCookie:cookie];
+        }
+    }
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    self.username.title = @"Login";
 }
 
 
